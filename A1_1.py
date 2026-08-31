@@ -4,7 +4,7 @@ class Grafo:
         with open(arquivo, 'r') as file:
             num_vertices = int(file.readline().strip().split()[1])
             self.Adj = [[float('inf') for x in range (num_vertices+1)] for x in range(num_vertices+1)]
-            self.V = [None]*(num_vertices+1)
+            self.V = ['']*(num_vertices+1)
             for i in range(num_vertices):
                 num, rotulo = file.readline().strip().split()
                 num = int(num)
