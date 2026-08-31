@@ -3,7 +3,7 @@ class Grafo:
         num_vertices = 0
         with open(arquivo, 'r') as file:
             num_vertices = int(file.readline().strip().split()[1])
-            self.Adj = [[float('inf') for x in range (num_vertices+1)] for x in range(num_vertices+1)]
+            self.Adj = [[[] for x in range (num_vertices+1)] for x in range(num_vertices+1)]
             self.V = ['']*(num_vertices+1)
             for i in range(num_vertices):
                 num, rotulo = file.readline().strip().split()
@@ -15,8 +15,8 @@ class Grafo:
                 u = int(u)
                 v = int(v)
                 w = float(w)
-                self.Adj[u][v] = w
-                self.Adj[v][u] = w
+                self.Adj[u][v].append(w)
+                self.Adj[v][u].append(w)
     def qtdVertices(self):
         return (len(self.Adj)-1)
     def qtdArestas(self):
@@ -24,13 +24,13 @@ class Grafo:
         num_vertices = self.qtdVertices()
         for u in range(1, num_vertices+1):
             for v in range(u + 1, num_vertices+1):
-                if (self.Adj[u][v] != float('inf')):
-                    num_arestas += 1
+                if (len(self.Adj[v][u]) > 0):
+                    num_arestas += len(self.Adj[u][v])
         return num_arestas
     def grau(self, v):
         grau = 0
         for u in range(1, self.qtdVertices()+1):
-            if (self.Adj[v][u] != float('inf')):
+            if (len(self.Adj[v][u]) > 0):
                 grau += 1
         return grau
     def rotulo(self, v):
@@ -38,6 +38,6 @@ class Grafo:
     def vizinhos(self, v):
         return [u for u in range(1, self.qtdVertices() + 1) if self.haAresta(v, u)]
     def haAresta(self, u, v):
-        return (self.Adj[u][v] != float('inf'))
+        return (len(self.Adj[u][v]) > 0)
     def peso(self, u, v):
-        return self.Adj[u][v]
+        return min(self.Adj[u][v])
