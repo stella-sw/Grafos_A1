@@ -3,7 +3,6 @@ from collections import deque
 import A1_1 as G_bib
 
 arquivo = sys.argv[1]
-indice_s = int(sys.argv[2])
 
 grafo = G_bib.Grafo(arquivo=arquivo)
 
@@ -20,14 +19,36 @@ def hierholzer(grafo: G_bib.Grafo):
             C[u][v] = len(grafo.Adj[u][v])
             C[v][u] = len(grafo.Adj[v][u])
 
-    v = None
+    # Verifica se todos os graus são pares
+    for u in range(1, num_vertices + 1):
+        if grafo.grau(u) % 2 != 0:
+            return False, None
+
+    inicio = None
 
     for k in range(1, num_vertices + 1):
         if grafo.grau(k) > 0:
-            v = k
+            inicio = k
             break
+
+    # Verifica se todos os vértices com arestas pertencem à mesma componente
+    visitados = [False] * (num_vertices + 1)
+    fila = [inicio]
+    visitados[inicio] = True
+
+    while len(fila) > 0:
+        u = fila.pop()
+
+        for v in grafo.vizinhos(u):
+            if not visitados[v]:
+                visitados[v] = True
+                fila.append(v)
+
+    for u in range(1, num_vertices + 1):
+        if grafo.grau(u) > 0 and not visitados[u]:
+            return False, None
     
-    r, Ciclo = buscarSubciclo(grafo, v, C)
+    r, Ciclo = buscarSubciclo(grafo, inicio, C)
 
     if (r == False):
         return (False, None)
@@ -61,20 +82,33 @@ def buscarSubciclo(grafo: G_bib.Grafo, v, C):
         if (v == t):
             break
 
-    num_vertices = grafo.qtdVertices()
+    Ciclo_original = Ciclo.copy()
 
-    for u in Ciclo:
+    for u in Ciclo_original:
         for w in grafo.vizinhos(u):
             if C[u][w] > 0:
-                r, Ciclo_interno = buscarSubciclo(grafo=grafo, v=u, C=C)
+
+                r, Ciclo_interno = buscarSubciclo(
+                    grafo=grafo,
+                    v=u,
+                    C=C
+                )
 
                 if r == False:
-                    return (False, None)
-
-                inserir = Ciclo.index(u)
+                    return False, None
 
                 if Ciclo_interno is not None:
+                    inserir = Ciclo.index(u)
+
                     for x in Ciclo_interno[1:]:
                         Ciclo.insert(inserir, x)
                         inserir += 1
     return (True, Ciclo)
+
+resultado, ciclo = hierholzer(grafo)
+
+if resultado:
+    print(1)
+    print(",".join(map(str, ciclo)))
+else:
+    print(0)

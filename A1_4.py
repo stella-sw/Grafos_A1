@@ -1,6 +1,11 @@
 import sys
 import A1_1 as G_bib
 
+arquivo = sys.argv[1]
+indice_s = int(sys.argv[2])
+
+grafo = G_bib.Grafo(arquivo)
+
 def algoritmoBellmanFord(grafo: G_bib.Grafo, origem: int):
     num_vertices = grafo.qtdVertices()
     
@@ -47,5 +52,10 @@ def algoritmoBellmanFord(grafo: G_bib.Grafo, origem: int):
         caminho.reverse()
         str_caminho = ",".join(map(str, caminho))
         
-        distancia = int(dist[destino]) if dist[destino].is_integer() else dist[destino] 
+        if dist[destino] == int(dist[destino]):
+            distancia = int(dist[destino])
+        else:
+            distancia = dist[destino]
         print(f"{destino}: {str_caminho}; d={distancia}")
+
+algoritmoBellmanFord(grafo, indice_s)

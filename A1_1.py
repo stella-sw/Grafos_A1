@@ -6,12 +6,15 @@ class Grafo:
             self.Adj = [[[] for x in range (num_vertices+1)] for x in range(num_vertices+1)]
             self.V = ['']*(num_vertices+1)
             for i in range(num_vertices):
-                num, rotulo = file.readline().strip().split()
+                num, rotulo = file.readline().strip().split(maxsplit=1)
                 num = int(num)
                 self.V[num] = rotulo
             file.readline()
             for line in file:
-                u, v, w = line.strip().split()
+                line = line.strip()
+                if not line:
+                    continue
+                u, v, w = line.split()
                 u = int(u)
                 v = int(v)
                 w = float(w)
@@ -24,14 +27,12 @@ class Grafo:
         num_vertices = self.qtdVertices()
         for u in range(1, num_vertices+1):
             for v in range(u + 1, num_vertices+1):
-                if (len(self.Adj[v][u]) > 0):
-                    num_arestas += len(self.Adj[u][v])
+                num_arestas += len(self.Adj[u][v])
         return num_arestas
     def grau(self, v):
         grau = 0
-        for u in range(1, self.qtdVertices()+1):
-            if (len(self.Adj[v][u]) > 0):
-                grau += 1
+        for u in range(1, self.qtdVertices() + 1):
+            grau += len(self.Adj[v][u])
         return grau
     def rotulo(self, v):
         return self.V[v]
@@ -40,4 +41,6 @@ class Grafo:
     def haAresta(self, u, v):
         return (len(self.Adj[u][v]) > 0)
     def peso(self, u, v):
-        return min(self.Adj[u][v])
+        if self.haAresta(u, v):
+            return min(self.Adj[u][v])
+        return float('inf')
