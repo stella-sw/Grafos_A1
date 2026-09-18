@@ -2,60 +2,72 @@ import sys
 import A1_1 as G_bib
 
 arquivo = sys.argv[1]
-indice_s = int(sys.argv[2])
+origem = int(sys.argv[2])
 
-grafo = G_bib.Grafo(arquivo)
+grafo = G_bib.Grafo(arquivo=arquivo)
 
-def algoritmoBellmanFord(grafo: G_bib.Grafo, origem: int):
+
+def algoritmoBellmanFord(grafo: G_bib.Grafo, origem):
     num_vertices = grafo.qtdVertices()
-    
-    # inicialização
-    # usei como referencia um código em C++, onde dist e pred eram ponteiros
-    # adaptei para o uso de decionários do Python
-    dist = {i: float('inf') for i in range(1, num_vertices + 1)}
-    pred = {i: None for i in range(1, num_vertices + 1)}
-    dist[origem] = 0
-    
-    # relaxamento
-    for _ in range(num_vertices - 1):
+
+    D = [float('inf')] * (num_vertices + 1)
+    A = [None] * (num_vertices + 1)
+
+    D[origem] = 0
+
+    for i in range(1, num_vertices):
+        mudou = False # aplica a melhoria vista em prova
+
         for u in range(1, num_vertices + 1):
-            # Para cada vértice u olha para os vizinhos v
             for v in grafo.vizinhos(u):
-                w = grafo.peso(u, v)
-                if dist[u] + w < dist[v]:
-                    dist[v] = dist[u] + w
-                    pred[v] = u
-                    
-    #  verificação de ciclos negativos
-    # se ainda for possível relaxar alguma aresta significa que há um ciclo negativo
+                peso = grafo.peso(u, v)
+
+                if D[u] != float('inf') and D[v] > D[u] + peso:
+                    D[v] = D[u] + peso
+                    A[v] = u
+                    mudou = True
+        
+        if not mudou:
+            break
+
     for u in range(1, num_vertices + 1):
         for v in grafo.vizinhos(u):
-            w = grafo.peso(u, v)
-            if dist[u] + w < dist[v]:
-                print("Erro: O grafo contém um ciclo de peso negativo alcançável a partir da origem.")
-                return 
-            
-    # saida esperada dos resultados
-    for destino in range(1, num_vertices + 1):
-        if dist[destino] == float('inf'):
-            continue
-            
-        caminho = []
-        atual = destino
-        
-        while atual is not None:
-            caminho.append(atual)
-            if atual == origem:
-                break
-            atual = pred[atual]
-            
-        caminho.reverse()
-        str_caminho = ",".join(map(str, caminho))
-        
-        if dist[destino] == int(dist[destino]):
-            distancia = int(dist[destino])
-        else:
-            distancia = dist[destino]
-        print(f"{destino}: {str_caminho}; d={distancia}")
+            peso = grafo.peso(u, v)
 
-algoritmoBellmanFord(grafo, indice_s)
+            if D[u] != float('inf') and D[v] > D[u] + peso:
+                return False, None, None
+
+    return True, D, A
+
+# reconstroi o caminho
+def caminho(A, origem, destino):
+    caminho = []
+    atual = destino
+
+    while atual is not None:
+        caminho.append(atual)
+
+        if atual == origem:
+            break
+
+        atual = A[atual]
+
+    caminho.reverse()
+
+    if caminho[0] != origem:
+        return []
+
+    return caminho
+
+
+resultado, D, A = bellmanFord(grafo, origem)
+
+# estrutura o resultado no formato espeado pelo VPL
+if resultado:
+    for v in range(1, grafo.qtdVertices() + 1):
+        if D[v] == float('inf'):
+            print(f"{v}: d=inf")
+        else:
+            caminho_v = caminho(A, origem, v)
+            caminho_str = ",".join(str(x) for x in caminho_v)
+            print(f"{v}: {caminho_str}; d={D[v]:g}")
